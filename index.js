@@ -40,6 +40,32 @@ var monster = {
         // for this version, the monster does not move, so just and x and y    
     x: 0,    y: 0
 };
+
+var rows = 4;
+var cols = 4;
+
+var trackRight = 2;
+var trackLeft = 1;
+var trackUp = 3;
+var trackDown = 0;
+
+var spriteWidth = 256;
+var spriteHeight = 256;
+var width = spriteWidth / cols;
+var height = spriteHeight / rows;
+var curXFrame = 0;
+var frameCount = 4;
+
+varsrcX = 0;
+varsrcY = 0;
+
+var left = false;
+var right = true;
+var up = false;
+var down = false;
+
+var counter = 0;
+
 var monstersCaught = 0;
 
 // Handle keyboard controls
@@ -61,17 +87,42 @@ addEventListener("keyup", function (e) {
 }, false);
 
 // Update game objects
-var update = function (modifier) {    
-    if (38 in keysDown && hero.y > 32+4) { //  holding up key    
+var update = function (modifier) {  
+    left = false;
+    right = false;
+
+    if (38 in keysDown && hero.y > 0){
+        left = false; 
+        right = false; 
+        up = true;
+        down = false; 
         hero.y -= hero.speed * modifier;
     }
-    if (40 in keysDown && hero.y < canvas.height - (64 + 6)) { //  holding down key
+
+
+    if (40 in keysDown && hero.y < 960 - 64){
+        left = false;
+        right = false;
+        up =  false;
+        down = true;
         hero.y += hero.speed * modifier;
     }
-    if (37 in keysDown && hero.x > (32+4)) { // holding left key    
+
+
+    if (37 in keysDown && hero.y > 0){
+        left = true;
+        right = false;
+        up =  false;
+        down = false; 
         hero.x -= hero.speed * modifier;
     }
-    if (39 in keysDown && hero.x < canvas.width - (64 + 6)) { // holding right key
+
+
+    if (39 in keysDown && hero.y > 1024-64){
+        left = false;
+        right = true;
+        up =  false;
+        down = false; 
         hero.x += hero.speed * modifier;
     }
 
@@ -92,6 +143,40 @@ var update = function (modifier) {
     }  
 };
 
+if (counter == 5) {
+    curXFrame = ++curXFrame % frameCount;
+    counter = 0;
+} else {
+    counter++;
+}
+
+srcX = curXFrame * width;
+
+if (left ){
+
+    src = trackLeft * height;     
+}
+
+if  (right){
+
+    srcY = trackRight * height;
+}
+
+if (up){
+
+    src = trackDown * height; 
+}
+
+if (down){
+
+    src = trackDown * height;    
+}
+
+if (left == false && right == false && up == false && down == false) {
+srcX = 1 * width;
+srcY = 2 * height;
+    
+}
 
 //=============================================
 
@@ -124,7 +209,7 @@ var reset = function () {
 
     monster.x = 32 + (Math.random() * (canvas.width - 96));    
     monster.y = 32 + (Math.random() * (canvas.height - 96));
-};      
+};
 
 
 
