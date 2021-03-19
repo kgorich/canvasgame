@@ -32,7 +32,8 @@ monsterImage.src = "images/monster.png";
 
 
 // Game objects
-var hero = {    speed: 256,  // movement in pixels per second
+var hero = {   
+    speed: 256,  // movement in pixels per second
     x: 0,  // where on the canvas are they?    
     y: 0   // where on the canvas are they?
 };
@@ -54,7 +55,7 @@ var spriteHeight = 256;
 var width = spriteWidth / cols;
 var height = spriteHeight / rows;
 var curXFrame = 0;
-var frameCount = 4;
+var frameCount = 4; //4 frames per row 
 
 varsrcX = 0;
 varsrcY = 0;
@@ -90,6 +91,8 @@ addEventListener("keyup", function (e) {
 var update = function (modifier) {  
     left = false;
     right = false;
+    up = false;
+    down = false; 
 
     if (38 in keysDown && hero.y > 0){
         left = false; 
@@ -129,10 +132,10 @@ var update = function (modifier) {
         
     // Are they touching?    
     if (
-        hero.x <= (monster.x + 32)
-        && monster.x <= (hero.x + 32)
-        && hero.y <= (monster.y + 32)
-        && monster.y <= (hero.y + 32)
+        hero.x <= (monster.x + 64)
+        && monster.x <= (hero.x + 64)
+        && hero.y <= (monster.y + 64)
+        && monster.y <= (hero.y + 64)
     ) {       
         ++monstersCaught;       // keep track of our “score” 
         if (monsterCaught > 4)
@@ -141,7 +144,7 @@ var update = function (modifier) {
         }
         reset();       // start a new cycle    
     }  
-};
+
 
 if (counter == 5) {
     curXFrame = ++curXFrame % frameCount;
@@ -152,31 +155,32 @@ if (counter == 5) {
 
 srcX = curXFrame * width;
 
-if (left ){
+if (left) {
 
-    src = trackLeft * height;     
+    srcY = trackLeft * height;     
 }
 
-if  (right){
+if  (right) {
 
     srcY = trackRight * height;
 }
 
-if (up){
+if (up) {
 
-    src = trackDown * height; 
+    srcY = trackUp * height; 
 }
 
-if (down){
+if (down) {
 
-    src = trackDown * height;    
+    srcY = trackDown * height;    
 }
 
 if (left == false && right == false && up == false && down == false) {
-srcX = 1 * width;
-srcY = 2 * height;
-    
+srcX = 0 * width;
+srcY = 0 * height;    
 }
+
+};
 
 //=============================================
 
@@ -186,7 +190,7 @@ var render = function () {
       ctx.drawImage(bgImage, 0, 0);   
     }    
     if (heroReady) {
-        ctx.drawImage(heroImage, hero.x, hero.y);
+        ctx.drawImage(heroImage, srcX, srcY, spriteWidth, spriteHeight, hero.x, hero.y, spriteWidth, spriteHeight);
     }    
     if (monsterReady) {        
         ctx.drawImage(monsterImage, monster.x, monster.y);    
@@ -197,7 +201,26 @@ var render = function () {
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
     ctx.fillText("Goblins caught: " + monstersCaught, 32, 32); 
-}
+};
+
+//The main game loop
+var main = function () {
+    var now = Date.now();
+    var delta = now - then;
+
+    update(delta / 1000);
+    render();    
+
+    then = now;
+
+    // Request to do this again ASAP using the Canvas method,
+    // it’s much like the JS timer function “setInterval, it will
+    // call the main method over and over again so our players 
+    // can move and be re-drawn    
+    requestAnimationFrame(main); 
+};
+
+
 
 // Reset the game when the player catches a monster
 var reset = function () {    
@@ -211,17 +234,9 @@ var reset = function () {
     monster.y = 32 + (Math.random() * (canvas.height - 96));
 };
 
-
-
-//The main game loop
-var main = function () {
-    render();    
-    // Request to do this again ASAP using the Canvas method,
-    // it’s much like the JS timer function “setInterval, it will
-    // call the main method over and over again so our players 
-    // can move and be re-drawn    
-    requestAnimationFrame(main); 
-};
+//cross browser support for requestAnimationFrame
+var w = window;
+requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame
 
 // Let's play this game!
 var then = Date.now();
