@@ -60,6 +60,8 @@ x:40,
 y:300
 };
 
+
+//sprite variables
 var rows = 4;
 var cols = 4;
 
@@ -75,8 +77,8 @@ var height = spriteHeight / rows;
 var curXFrame = 0;
 var frameCount = 4; //4 frames per row 
 
-varsrcX = 0;
-varsrcY = 0;
+var srcX = 0;
+var srcY = 0;
 
 var left = false;
 var right = true;
@@ -106,7 +108,9 @@ addEventListener("keyup", function (e) {
 }, false);
 
 // Update game objects
-var update = function (modifier) {  
+var update = function (modifier) { 
+    ctx.clearRect(hero.x, hero.y, width, height);
+    
     left = false;
     right = false;
     up = false;
@@ -130,7 +134,7 @@ var update = function (modifier) {
     }
 
 
-    if (37 in keysDown && hero.y > 0){ //left
+    if (37 in keysDown && hero.x > 0){ //left
         left = true;
         right = false;
         up =  false;
@@ -139,7 +143,7 @@ var update = function (modifier) {
     }
 
 
-    if (39 in keysDown && hero.y > 1024-64){ //right
+    if (39 in keysDown && hero.x < 1024-64){ //right
         left = false;
         right = true;
         up =  false;
@@ -170,39 +174,39 @@ var update = function (modifier) {
     }
 
 
-if (counter == 5) {
-    curXFrame = ++curXFrame % frameCount;
-    counter = 0;
-} else {
-    counter++;
-}
+    if (counter == 5) {
+        curXFrame = ++curXFrame % frameCount;
+        counter = 0;
+    } else {
+        counter++;
+    }
 
-srcX = curXFrame * width;
+    srcX = curXFrame * width;
 
-if (left) {
+    if (left) {
 
-    srcY = trackLeft * height;     
-}
+        srcY = trackLeft * height;     
+    }
 
-if  (right) {
+    if (right) {
 
-    srcY = trackRight * height;
-}
+        srcY = trackRight * height;
+    }
 
-if (up) {
+    if (up) {
 
-    srcY = trackUp * height; 
-}
+        srcY = trackUp * height; 
+    }
 
-if (down) {
+    if (down) {
 
-    srcY = trackDown * height;    
-}
+        srcY = trackDown * height;    
+    }
 
-if (left == false && right == false && up == false && down == false) {
-srcX = 0 * width;
-srcY = 0 * height;    
-}
+    if (left == false && right == false && up == false && down == false) {
+        srcX = 0 * width;
+        srcY = 0 * height;    
+    }
 
 };
 
@@ -214,7 +218,7 @@ var render = function () {
       ctx.drawImage(bgImage, 0, 0);   
     }    
     if (heroReady) {
-        ctx.drawImage(heroImage, srcX, srcY, spriteWidth, spriteHeight, hero.x, hero.y, spriteWidth, spriteHeight);
+        ctx.drawImage(heroImage, srcX, srcY, width, height, hero.x, hero.y, width, height);
     }    
     if (monsterReady) {        
         ctx.drawImage(monsterImage, monster.x, monster.y);    
@@ -240,8 +244,8 @@ var reset = function () {
     // but not in the hedges, Article in wrong, the 64 needs to be 
     // hedge 32 + hedge 32 + char 32 = 96  
 
-    //monster.x = 32 + (Math.random() * (canvas.width - 96));    
-    //monster.y = 32 + (Math.random() * (canvas.height - 96));
+    // monster.x = 32 + (Math.random() * (canvas.width - 96));    
+    // monster.y = 32 + (Math.random() * (canvas.height - 96));
 
     let noGood = true;
     while (noGood) {
