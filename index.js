@@ -94,7 +94,7 @@ var update = function (modifier) {
     up = false;
     down = false; 
 
-    if (38 in keysDown && hero.y > 0){
+    if (38 in keysDown && hero.y > 0){ //up
         left = false; 
         right = false; 
         up = true;
@@ -103,7 +103,7 @@ var update = function (modifier) {
     }
 
 
-    if (40 in keysDown && hero.y < 960 - 64){
+    if (40 in keysDown && hero.y < 960 - 64){ //down
         left = false;
         right = false;
         up =  false;
@@ -112,7 +112,7 @@ var update = function (modifier) {
     }
 
 
-    if (37 in keysDown && hero.y > 0){
+    if (37 in keysDown && hero.y > 0){ //left
         left = true;
         right = false;
         up =  false;
@@ -121,7 +121,7 @@ var update = function (modifier) {
     }
 
 
-    if (39 in keysDown && hero.y > 1024-64){
+    if (39 in keysDown && hero.y > 1024-64){ //right
         left = false;
         right = true;
         up =  false;
