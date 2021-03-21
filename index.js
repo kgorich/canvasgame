@@ -1,304 +1,334 @@
 // Create the canvas
-var canvas = document.createElement("canvas");
-var ctx = canvas.getContext("2d");
+let canvas = document.createElement("canvas");
+let ctx = canvas.getContext("2d");
 canvas.width = 800;
 canvas.height = 800;
 document.body.appendChild(canvas);
-var gameOver = false; 
 
-//Background image
-var bgReady = false;
-var bgImage = new Image();
-bgImage.onload = function () {    
-    bgReady = true;
+// Background image
+let backgroundReady = false;
+let backgroundImage = new Image();
+backgroundImage.onload = function () {
+    backgroundReady = true;
 };
-bgImage.src = "images/garden.png";
+backgroundImage.src = "images/background.png";
 
-//Hero img
-var heroReady = false;
-var heroImage = new Image();
+// Border image
+let borderReady = false;
+let borderImage = new Image();
+borderImage.onload = function () {
+    borderReady = true;
+};
+borderImage.width = 32;
+borderImage.height = 32;
+borderImage.src = "images/border.png";
+
+// Hero image
+let heroReady = false;
+let heroImage = new Image();
 heroImage.onload = function () {
     heroReady = true;
 };
-heroImage.src = "images/ash.png";
+heroImage.src = "images/hero.png";
 
-//Monster img
-var monsterReady = false;
-var monsterImage = new Image();
-monsterImage.onload = function () {    
+// Monster image
+let monsterReady = false;
+let monsterImage = new Image();
+monsterImage.onload = function () {
     monsterReady = true;
 };
-monsterImage.src = "images/pikachu.png";
+monsterImage.src = "images/monster.png";
 
-//Rocket img
-var rocketReady = false;
-var rocketImage = new Image(); {
-    rocketReady = true;
+// Coin image
+let coinReady = false;
+let coinImage = new Image();
+coinImage.onload = function () {
+    coinReady = true;
 };
-rocketImage.src = "images/koffing.png";
+coinImage.src = "images/coin.png";
 
+// Bolt image
+let boltReady = false;
+let boltImage = new Image();
+boltImage.onload = function () {
+    boltReady = true;
+};
+boltImage.src = "images/bolt.png";
+
+// Found sound
+let foundSound = new Audio("sounds/found.mp3");
+foundSound.preload = "auto";
+foundSound.load();
+
+// Crash sound
+let crashSound = new Audio("sounds/crash.mp3");
+crashSound.preload = "auto";
+crashSound.load();
+
+// Win sound
+let winSound = new Audio("sounds/win.mp3");
+winSound.preload = "auto";
+winSound.load();
+
+//  ***************************************************************************************
+//  ***************************************************************************************
 // Game objects
-var hero = {   
-    speed: 256,  // movement in pixels per second
-    x: 0,  // where on the canvas are they?    
-    y: 0   // where on the canvas are they?
-};
-var monster = {
-        // for this version, the monster does not move, so just and x and y    
-    x: 0,    y: 0
-};
-var rocket1 = {
-x:200,
-y: 200
-};
-var rocket2 = {
-x:100,
-y:40
-};
-var rocket3 = {
-x:40,
-y:300
+let hero = {
+    speed: 256,
+    x: 0,
+    y: 0
 };
 
+let monster = {
+    speed: 256,
+    x: 0,
+    y: 0
+};
 
-//sprite variables
-var rows = 4;
-var cols = 4;
+let coin = {
+    x: 0,
+    y: 0
+};
 
-var trackRight = 2;
-var trackLeft = 1;
-var trackUp = 3;
-var trackDown = 0;
+let bolt = {
+    speed: 256,
+    x: 0,
+    y: 0
+};
 
-var spriteWidth = 272;
-var spriteHeight = 288;
-var width = spriteWidth / cols;
-var height = spriteHeight / rows;
-var curXFrame = 0;
-var frameCount = 4; //4 frames per row 
+//  ***************************************************************************************
+//  ***************************************************************************************
+// Variables to keep track of sprite geometry
+let rows = 4;
+let cols = 4;
 
-var srcX = 0;
-var srcY = 0;
+let trackRight = 2;
+let trackLeft = 1;
+let trackUp = 3;
+let trackDown = 0;
 
-var left = false;
-var right = true;
-var up = false;
-var down = false;
+let spriteWidth = 256;
+let spriteHeight = 256;
 
-var counter = 0;
+let width = spriteWidth / cols;
+let height = spriteHeight / rows;
 
-var monstersCaught = 0;
+let curXFrame = 0;
+let frameCount = 4;
 
+let srcX = 0;
+let srcY = 0;
+
+let left = false;
+let right = true;
+let up = false;
+let down = false;
+
+//  ***************************************************************************************
+//  ***************************************************************************************
+let coinsFound = 0;
+let gameOver = false;
+let rateCounter = 0;
+
+//  ***************************************************************************************
+//  ***************************************************************************************
 // Handle keyboard controls
-var keysDown = {};
-//object were we properties when keys go down 
-// and then delete them when the key goes up
-// so the object tells us if any key is down when that keycode
-// is down.  In our game loop, we will move the hero image if when
-// we go thru render, a key is down
+let keysDown = {};
 
 addEventListener("keydown", function (e) {
-    //console.log(e.keyCode + " down")
-    keysDown[e.keyCode] = true;
+   keysDown[e.code] = true; 
 }, false);
 
-addEventListener("keyup", function (e) {    
-    //console.log(e.keyCode + " up")    
-    delete keysDown[e.keyCode];
-}, false);
+addEventListener("keyup", function (e) {
+    delete keysDown[e.code]; 
+ }, false);
 
+//  ***************************************************************************************
+//  ***************************************************************************************
 // Update game objects
-var update = function (modifier) { 
-    ctx.clearRect(hero.x, hero.y, width, height);
-    
-    left = false;
-    right = false;
-    up = false;
-    down = false; 
+let update = function (modifier) {
+    ctx.clearRect(hero.x, hero.y, width, height); // clear last image position
 
-    if (38 in keysDown && hero.y > 0){ //up
-        left = false; 
-        right = false; 
-        up = true;
-        down = false; 
-        hero.y -= hero.speed * modifier;
-    }
-
-
-    if (40 in keysDown && hero.y < 960 - 64){ //down
+    if ("ArrowUp" in keysDown && hero.y > 24) {
         left = false;
         right = false;
-        up =  false;
+        up = true;
+        down = false;
+        hero.y -= hero.speed * modifier;
+    }
+    if ("ArrowDown" in keysDown && hero.y < (800 - 96)) {
+        left = false;
+        right = false;
+        up = false;
         down = true;
         hero.y += hero.speed * modifier;
     }
-
-
-    if (37 in keysDown && hero.x > 0){ //left
+    if ("ArrowLeft" in keysDown && hero.x > 20) {
         left = true;
         right = false;
-        up =  false;
-        down = false; 
+        up = false;
+        down = false;
         hero.x -= hero.speed * modifier;
     }
-
-
-    if (39 in keysDown && hero.x < 1024-64){ //right
+    if ("ArrowRight" in keysDown && hero.x < (800 - 80)) {
         left = false;
         right = true;
-        up =  false;
-        down = false; 
+        up = false;
+        down = false;
         hero.x += hero.speed * modifier;
     }
+    // Did the hero find coins?
+    if (hero.x <= (coin.x + 32) && coin.x <= (hero.x + 32) && hero.y <= (coin.y + 32) && coin.y <= (hero.y + 32)) {
+        ++coinsFound;
+        foundSound.play();
 
-        
-    // Are they touching?    
-    if (
-        hero.x <= (monster.x + 64)
-        && monster.x <= (hero.x + 64)
-        && hero.y <= (monster.y + 64)
-        && monster.y <= (hero.y + 64)
-    ) {       
-        ++monstersCaught;       // keep track of our “score” 
-        if (monsterCaught > 4)
-        {
-            alert("You Won!");
+        if (coinsFound > 3) {
+            winSound.play();
+            alert("You won!");
             gameOver = true;
         }
-        reset();       // start a new cycle    
-    }  
-    
-    if (touchingRocket(hero)) {
-        alert("Oh no! Team Rocket has captured you. Its game over!")
-        gameOver = true;
+        reset();
     }
-
-
-    if (counter == 5){
-        curXFrame = ++curXFrame % frameCount;
-        counter = 0;
-    } else {
-        counter++;
+    if (monsterAttack(hero)) {
+        crashSound.play();
+        alert("You've been attacked, game over!");
+        gameOver = true;
+        reset();
+    }
+    if (heroOverlap(bolt)) {
+        crashSound.play();
+        alert("You've been shocked, game over!");
+        gameOver = true;
+        reset();
+    }
+    
+    if (bolt.y > (canvas.height - borderImage.height)) {
+        bolt.x = 32 + (Math.random() * (canvas.width - 96));
+        bolt.y = 32;
+    }
+    if (coinsFound == 0) {
+        bolt.y += 2;
+    }
+    if (coinsFound == 1) {
+        bolt.y += 4;
+    }
+    if (coinsFound == 2) {
+        bolt.y += 6;
+    }
+    if (coinsFound == 3) {
+        bolt.y += 8;
     }
 
     srcX = curXFrame * width;
-
     if (left) {
-
-        srcY = trackLeft * height;     
+        srcY = trackLeft * height;
     }
-
     if (right) {
-
         srcY = trackRight * height;
     }
-
     if (up) {
-
-        srcY = trackUp * height; 
+        srcY = trackUp * height;
     }
-
     if (down) {
-
-        srcY = trackDown * height;    
+        srcY = trackDown * height;
     }
-
-    if (left == false && right == false && up == false && down == false) {
-        srcX = 0 * width;
-        srcY = 0 * height;    
-    }
-
 };
 
-//=============================================
-
-// Draw everything in the main render function
-var render = function () {
-    if (bgReady) {     
-      ctx.drawImage(bgImage, 0, 0);   
-    }    
-    if (heroReady) {
-        ctx.drawImage(heroImage, srcX, srcY, width, height, hero.x, hero.y, width, height);
-    }    
-    if (monsterReady) {        
-        ctx.drawImage(monsterImage, monster.x, monster.y);    
-    } 
-    if (rocketReady) {
-        ctx.drawImage(rocketImage, rocket1.x, rocket1.y);
-        ctx.drawImage(rocketImage, rocket2.x, rocket2.y);
-        ctx.drawImage(rocketImage, rocket3.x, rocket3.y);
+//  ***************************************************************************************
+//  ***************************************************************************************
+// Draw everything in the render function
+let render = function () {
+    if (backgroundReady) {
+        ctx.drawImage(backgroundImage, 0, 0);
     }
-
-    // Score    
-    ctx.fillStyle = "rgb(250, 250, 250)";
-    ctx.font = "24px Helvetica";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "top";
-    ctx.fillText("Pokemon saved: " + monstersCaught, 32, 32); 
-}
-//Reset the game when the player catches a monster
-var reset = function () {     
-    hero.x = canvas.width / 2;    
-    hero.y = canvas.height / 2;
-    //Place the monster somewhere on the screen randomly
-    // but not in the hedges, Article in wrong, the 64 needs to be 
-    // hedge 32 + hedge 32 + char 32 = 96  
-
-    // monster.x = 32 + (Math.random() * (canvas.width - 96));    
-    // monster.y = 32 + (Math.random() * (canvas.height - 96));
-
-    let noGood = true;
-    while (noGood) {
-        monster.x = 32 + (Math.random() * (canvas.width - 96));    
-        monster.y = 32 + (Math.random() * (canvas.height - 96));
-
-        if (!touchingRocket(monster)) {
-            noGood = false;
+    if (borderReady) {
+        for (let i = 0; i < canvas.width; i = i += borderImage.width) {
+            ctx.drawImage(borderImage, i, 0);
+            ctx.drawImage(borderImage, i, canvas.width - borderImage.width);         
+        }
+        for (let i = 0; i < canvas.height - (borderImage.height * 2); i = i += borderImage.height) {
+            ctx.drawImage(borderImage, 0, borderImage.height + i);
+            ctx.drawImage(borderImage, canvas.height - borderImage.height, borderImage.height + i);
         }
     }
+    if (!gameOver) {
+        if (boltReady) {
+            ctx.drawImage(boltImage, bolt.x, bolt.y);
+        }
+        if (coinReady) {
+            ctx.drawImage(coinImage, coin.x, coin.y);
+        }
+        if (monsterReady) {
+            ctx.drawImage(monsterImage, monster.x, monster.y);
+        }
+        if (heroReady) {
+            ctx.drawImage(heroImage, srcX, srcY, width, height, hero.x, hero.y, width, height);
+        }
+        // Display coins remaining
+        ctx.fillStyle = "rgb(250, 250, 250)";
+        ctx.font = "24px Arial";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Coins Remaining: " + (4 - coinsFound), 50, 50);
+    }
+
 };
 
-//The main game loop
-var main = function () {
-    var now = Date.now();
-    var delta = now - then;
+//  ***************************************************************************************
+//  ***************************************************************************************
+// Reset the game
+let reset = function () {
+    hero.x = (canvas.width / 2);
+    hero.y = (canvas.height / 2);
+    
+    let notGood = true;
+    while (notGood) {
+        monster.x = 32 + (Math.random() * (canvas.width - 96));
+        monster.y = 32 + (Math.random() * (canvas.height - 96));
+        coin.x = 32 + (Math.random() * (canvas.width - 96));
+        coin.y = 32 + (Math.random() * (canvas.height - 96));
+        bolt.x = 32 + (Math.random() * (canvas.width - 96));
+        bolt.y = 32;
 
-    update(delta / 1000);
-    render();    
-
-    then = now;
-
-    // Request to do this again ASAP using the Canvas method,
-    // it’s much like the JS timer function “setInterval, it will
-    // call the main method over and over again so our players 
-    // can move and be re-drawn    
-    requestAnimationFrame(main); 
+        if (!monsterAttack(hero) && !heroOverlap(coin)) {
+            notGood = false;
+        }
+    }    
 };
 
-//cross browser support for requestAnimationFrame
-var w = window;
-requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
 
-// Let's play this game!
-var then = Date.now();
-reset();
-main();  // call the main game loop.
-
-function touchingRocket(who) {
-if (
-    (who.x <= (rocket1.x+64)
-       && rocket1.x <= (who.x + 32)
-       && who.y <= (rocket1 + 64)
-       && rocket2.y (who.y + 32)) ||
-    (who.x <= (rocket1.x+64)
-       && rocket2.x <= (who.x + 32)
-       && who.y <= (rocket2 + 64)
-       && rocket2.y (who.y + 32)) ||
-    (who.x <= (rocket3.x+64)
-       && rocket3.x <= (who.x + 32)
-       && who.y <= (rocket3 + 64)
-       && rocket3.y (who.y + 32))
-
+//  ***************************************************************************************
+//  ***************************************************************************************
+function monsterAttack(who) {
+    if (
+        (who.x <= (monster.x + 32) && monster.x <= (who.x + 32) && who.y <= (monster.y + 32) && monster.y <= (who.y + 32))
     )
-        return true;
+    return true;
 }
+
+function heroOverlap(who) {
+    if (
+        (who.x <= (hero.x + 32) && hero.x <= (who.x + 32) && who.y <= (hero.y + 32) && hero.y <= (who.y + 32))
+    )
+    return true;
+}
+
+//  ***************************************************************************************
+//  ***************************************************************************************
+// Main game loop
+let main = function () {
+    let now = Date.now();
+    let delta = (now - then);
+    update(delta / 1000);
+    render();
+    then = now;
+    // Request to run the main game loop again
+    requestAnimationFrame(main);
+};
+
+//  ***************************************************************************************
+//  ***************************************************************************************
+// Start the playing the game
+let then = Date.now();
+reset();
+main();
