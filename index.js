@@ -1,8 +1,8 @@
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
-canvas.width = 512;
-canvas.height = 480;
+canvas.width = 800;
+canvas.height = 800;
 document.body.appendChild(canvas);
 var gameOver = false; 
 
@@ -12,7 +12,7 @@ var bgImage = new Image();
 bgImage.onload = function () {    
     bgReady = true;
 };
-bgImage.src = "images/background.png";
+bgImage.src = "images/garden.png";
 
 //Hero img
 var heroReady = false;
@@ -35,7 +35,7 @@ var rocketReady = false;
 var rocketImage = new Image(); {
     rocketReady = true;
 };
-rocketImage.src = "images/rocket1.png";
+rocketImage.src = "images/koffing.png";
 
 // Game objects
 var hero = {   
@@ -174,7 +174,7 @@ var update = function (modifier) {
     }
 
 
-    if (counter == 5) {
+    if (counter == 5){
         curXFrame = ++curXFrame % frameCount;
         counter = 0;
     } else {
